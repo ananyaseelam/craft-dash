@@ -1,13 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, X } from 'lucide-react';
 
+interface Project {
+  id: string;
+  image: string;
+  caption: string;
+  timestamp: number;
+}
+
 export default function CraftProjectFeed() {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
   const [caption, setCaption] = useState('');
-  const [imagePreview, setImagePreview] = useState(null);
-  const [imageData, setImageData] = useState(null);
+  const [imagePreview, setImagePreview] = useState<string | ArrayBuffer | null>(null);
+  const [imageData, setImageData] = useState<string | ArrayBuffer | null>(null);
 
   useEffect(() => {
     const link = document.createElement('link');
@@ -44,10 +51,10 @@ export default function CraftProjectFeed() {
 
   const loadProjects = () => {
     try {
-      const loadedProjects = [];
+      const loadedProjects : Project[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key.startsWith('project:')) {
+        if (key && key.startsWith('project:')) {
           const value = localStorage.getItem(key);
           if (value) {
             loadedProjects.push(JSON.parse(value));
@@ -63,13 +70,14 @@ export default function CraftProjectFeed() {
     }
   };
 
-  const handleImageSelect = (e) => {
-    const file = e.target.files[0];
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result);
-        setImageData(reader.result);
+        const result = reader.result as string;
+        setImagePreview(result);
+        setImageData(result);
       };
       reader.readAsDataURL(file);
     }
@@ -97,7 +105,7 @@ export default function CraftProjectFeed() {
     }
   };
 
-  const deleteProject = (id) => {
+  const deleteProject = (id : string) => {
     window.localStorage.removeItem(`project:${id}`);
     loadProjects();
   };
@@ -152,7 +160,7 @@ export default function CraftProjectFeed() {
                 </div>
                 {imagePreview && (
                   <img
-                    src={imagePreview}
+                    src={imagePreview as string}
                     alt="Preview"
                     style={{height: '200px', width: '100%', maxWidth: '400px', margin: '1rem', borderRadius: '4px', objectFit: 'cover'}}
                   />
@@ -176,7 +184,7 @@ export default function CraftProjectFeed() {
                       padding: '0.75rem 1rem',
                       outline: 'none'
                     }}
-                    rows="3"
+                    rows={3}
                   />
                 </div>
                 <button
